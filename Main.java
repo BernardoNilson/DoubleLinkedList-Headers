@@ -1,6 +1,5 @@
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +14,7 @@ import java.nio.file.Paths;
 
 public class Main {
 
+    // NÃO ALTERAR
     public static void LeArquivo(String nome, DoubleLinkedListOfHeaders L)
     {
         Path path1 = Paths.get(nome);
@@ -35,21 +35,24 @@ public class Main {
     }
     public static void main(String[] args) {
 
-
         DoubleLinkedListOfHeaders L = new DoubleLinkedListOfHeaders();
 
-        LeArquivo("ListaDePalavrasSmall.txt", L);
+        LeArquivo("ListaDePalavrasDEC.txt", L);
 
         // Ao inves de ler um arquivo, voce pode testar seu métodos 
         // usando chamadas do método addIncreasingOrder
         
-        L.addIncreasingOrder("Pedra");
         L.addIncreasingOrder("Casa");     
         L.addIncreasingOrder("Dado");
         L.addIncreasingOrder("Abacate");
-        L.addIncreasingOrder("Telha");
         
-        
+        L.addIncreasingOrder("Bolacha");
+        L.addIncreasingOrder("Casado");
+
+        L.Remove("Simples");
+        L.Remove("Querido");
+        L.Remove("Papel");
+
         L.ImprimeLista();
 
         L.GeraDOT();

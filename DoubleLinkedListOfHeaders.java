@@ -2,6 +2,8 @@
  * Esta é a classe DoubleLinkedListOfHeaders do T2 de ALESTI. Leia o README.md para mais informações.
  */
 
+import java.util.Objects;
+
 public class DoubleLinkedListOfHeaders {
     // Referencia para o sentinela de inicio da lista encadeada.
     private Node header;
@@ -42,40 +44,37 @@ public class DoubleLinkedListOfHeaders {
         trailer.prev = header;
         count = 0;
     }
-    
-    /**
-     * Retorna true se a lista não contem elementos
-     * @return true se a lista não contem elementos
-     */
-    public boolean isEmpty() {
-        return (count == 0);
-    }
 
     // Este método insere manualmente algumas palavras na lista PalavrasComMesmaInicial apenas para exemplificar o funcionamento. 
     // ALTERAR
-    void AdicionaPalavrasNaSublista(Node n, String e )
+    void addInSublist(Node head, String e)
     {
-        String temp = new String(e);
-        temp = temp + 0;
-        //Imprime(" Inserindo: " + temp);
-        NodePalavra aux;
-        aux = new NodePalavra(temp);
-        n.PalavrasComMesmaInicial = aux;
+        NodePalavra n = new NodePalavra(e);
 
-        for (int i = 1; i < 4;i++)
-        {
-            temp = e + i;
-            //Imprime(" Inserindo: " + temp);
-            NodePalavra aux2;
-            aux2 = new NodePalavra(temp);
-            aux.next = aux2;
-            aux = aux2;
+        if (head.PalavrasComMesmaInicial == null){
+            head.PalavrasComMesmaInicial = n;
+        } else {
+            NodePalavra aux = head.PalavrasComMesmaInicial;
+            NodePalavra prev = null;
+          
+            while (aux != null && aux.element.compareTo(e) < 0){
+                prev = aux;
+                aux = aux.next;
+                
+            }
+            
+            n.next = aux;
+            if (prev != null) prev.next = n;
+            else head.PalavrasComMesmaInicial = n;
         }
+
+        if (n.element.compareTo(head.element) < 0) swapNodes(n, head);
     }
     
     // ALTERAR
     public void addIncreasingOrder(String palavra)
     {
+        System.out.println("\n");
         int i;
         // insere a palavra na lista
         Node aux = header.next; // obtem uma referencia para o 1o. elemento
@@ -86,6 +85,7 @@ public class DoubleLinkedListOfHeaders {
             aux = aux.next;
         }
         
+
         // Primeiro cria o nodo
         Node n = new Node(palavra);
         // Neste ponto 'n' aponta o para o novo nodo 'aux' aponta
@@ -95,33 +95,104 @@ public class DoubleLinkedListOfHeaders {
         // se eh necessario algum ajuste na lista de palavras que tem
         // a mesma letra inicial que 'palavra'
 
-        //Imprime("Inserindo " + palavra);
+        Node prev = aux.prev; 
+        if (prev.element != null && palavra.charAt(0) == prev.element.charAt(0)){
+            System.out.println("Estou adicionando na sublista a palavra e a palavra HEAD" + palavra + prev.element);
+            addInSublist(prev, palavra);
+        } else if (aux.element != null && palavra.charAt(0) == aux.element.charAt(0)) {
+            addInSublist(aux, palavra);
+        } else {
 
-        //Imprime("Aux aponta para " + aux.element);
+            System.out.println("Inserindo " + palavra);
+            System.out.println("Aux aponta para " + aux.element);
 
+            // Primeiro "gruda" o novo nodo na lista
+            n.next = aux;
+            n.prev = aux.prev;
+            // Atualiza as referencias para apontarem para o novo nodo
+            Node ant = aux.prev; 
+            ant.next = n;
+            aux.prev = n;
+        
+            // Atualiza o contador
+            count++;
+        }
+    }
 
-
-        // Primeiro "gruda" o novo nodo na lista
-        n.next = aux;
-        n.prev = aux.prev;
-        // Atualiza as referencias para apontarem para o novo nodo
-        Node ant = aux.prev; 
-        ant.next = n;
-        aux.prev = n;
-        // Atualiza o contador
-        count++;
-
-        // Esta linha deve ser substituida
-        AdicionaPalavrasNaSublista(n, palavra);
+    public void swapNodes(NodePalavra n, Node head){
+        if (n != null && head != null){
+            String temp = head.element;
+            head.element = n.element;
+            n.element = temp;
+        }
     }
 
     // ALTERAR
-    void Remove(String palavra)
+    public void Remove(String palavra)
     {
+        Node aux = findNode(palavra);
+        System.out.println("Node corresponde a palavra " + aux.element);
+        if (aux != null){
+            if (aux.element.equals(palavra)) removeNode(aux);
+            else {
+                NodePalavra auxiliar = aux.PalavrasComMesmaInicial;
+                NodePalavra ant = null;
 
+                while(auxiliar != null){
+                    if (auxiliar.element.equals(palavra)){
+                        if (ant == null) aux.PalavrasComMesmaInicial = auxiliar.next;
+                        else ant.next = auxiliar.next;
+                        System.out.println("Cheguei até o nodo " + auxiliar.element);
+                        break;
+                    }
+                    ant = auxiliar;
+                    auxiliar = auxiliar.next;
+                    
+                } 
+                
+            }
+
+            count--;
+        }
+    }
+
+    public void removeNode(Node n){
+        Node ant = n.prev;
+        if (n.PalavrasComMesmaInicial != null){
+
+            Node temp = new Node(n.PalavrasComMesmaInicial.element);
+            temp.PalavrasComMesmaInicial = n.PalavrasComMesmaInicial.next;
+
+            temp.next = n.next;
+            temp.prev = ant;
+            ant.next = temp;
+            n.next.prev = temp;
+        } else {
+            ant.next = n.next;
+            n.next.prev = ant;
+        }
+        System.out.println("removi o nodo inteiro");
+    }
+
+    public Node findNode(String word){
+        Node aux = header.next;
+        while(aux != null){
+            if (word.charAt(0) == aux.element.charAt(0)) return aux;
+            aux = aux.next;
+        }
+        return null;
+        
     }
     
     // NÃO ALTERAR A PARTIR DAQUI
+
+    /**
+     * Retorna true se a lista não contem elementos
+     * @return true se a lista não contem elementos
+     */
+    public boolean isEmpty() {
+        return (count == 0);
+    }
 
     // NÃO ALTERAR
     String geraHash()
@@ -164,7 +235,7 @@ public class DoubleLinkedListOfHeaders {
         System.out.print(s);
     }
     
-    //NÃO ALTERAR
+    // NÃO ALTERAR
     void ImprimeLista()
     {
         Imprime("\n**********************\n");
@@ -173,7 +244,7 @@ public class DoubleLinkedListOfHeaders {
         Imprime("HASH: " + geraHash()+ "\n");
     }
 
-    //NÃO ALTERAR
+    // NÃO ALTERAR
     /*
      * *********************************************
      * Deste ponto em diante, o código serve para gerar codigo DOT
