@@ -1,9 +1,6 @@
-/*
+/**
  * Esta é a classe DoubleLinkedListOfHeaders do T2 de ALESTI. Leia o README.md para mais informações.
  */
-
-import java.util.Objects;
-
 public class DoubleLinkedListOfHeaders {
     // Referencia para o sentinela de inicio da lista encadeada.
     private Node header;
@@ -57,10 +54,9 @@ public class DoubleLinkedListOfHeaders {
             NodePalavra aux = head.PalavrasComMesmaInicial;
             NodePalavra prev = null;
           
-            while (aux != null && aux.element.compareTo(e) < 0){
+            while (aux != null && isSmaller(aux.element, e)){
                 prev = aux;
                 aux = aux.next;
-                
             }
             
             n.next = aux;
@@ -68,13 +64,12 @@ public class DoubleLinkedListOfHeaders {
             else head.PalavrasComMesmaInicial = n;
         }
 
-        if (n.element.compareTo(head.element) < 0) swapNodes(n, head);
+        if (isSmaller(n.element, head.element)) swapNodes(n, head);
     }
     
     // ALTERAR
     public void addIncreasingOrder(String palavra)
     {
-        System.out.println("\n");
         int i;
         // insere a palavra na lista
         Node aux = header.next; // obtem uma referencia para o 1o. elemento
@@ -84,7 +79,6 @@ public class DoubleLinkedListOfHeaders {
                 break;
             aux = aux.next;
         }
-        
 
         // Primeiro cria o nodo
         Node n = new Node(palavra);
@@ -96,19 +90,13 @@ public class DoubleLinkedListOfHeaders {
         // a mesma letra inicial que 'palavra'
 
         Node prev = aux.prev; 
-        if (prev.element != null && palavra.charAt(0) == prev.element.charAt(0)){
-            System.out.println("Estou adicionando na sublista a palavra e a palavra HEAD" + palavra + prev.element);
-            addInSublist(prev, palavra);
-        } else if (aux.element != null && palavra.charAt(0) == aux.element.charAt(0)) {
-            addInSublist(aux, palavra);
-        } else {
-
-            System.out.println("Inserindo " + palavra);
-            System.out.println("Aux aponta para " + aux.element);
-
+        if (isInitialEqual(palavra, prev.element)) addInSublist(prev, palavra);
+        else if (isInitialEqual(palavra, aux.element)) addInSublist(aux, palavra);
+        else {
             // Primeiro "gruda" o novo nodo na lista
             n.next = aux;
             n.prev = aux.prev;
+
             // Atualiza as referencias para apontarem para o novo nodo
             Node ant = aux.prev; 
             ant.next = n;
@@ -117,6 +105,8 @@ public class DoubleLinkedListOfHeaders {
             // Atualiza o contador
             count++;
         }
+
+        
     }
 
     public void swapNodes(NodePalavra n, Node head){
@@ -131,57 +121,69 @@ public class DoubleLinkedListOfHeaders {
     public void Remove(String palavra)
     {
         Node aux = findNode(palavra);
-        System.out.println("Node corresponde a palavra " + aux.element);
+        System.out.println("preciso remover " + palavra + " e encontrei "+aux.element);
         if (aux != null){
             if (aux.element.equals(palavra)) removeNode(aux);
-            else {
+            else if (aux.PalavrasComMesmaInicial != null){
                 NodePalavra auxiliar = aux.PalavrasComMesmaInicial;
                 NodePalavra ant = null;
 
-                while(auxiliar != null){
-                    if (auxiliar.element.equals(palavra)){
-                        if (ant == null) aux.PalavrasComMesmaInicial = auxiliar.next;
-                        else ant.next = auxiliar.next;
-                        System.out.println("Cheguei até o nodo " + auxiliar.element);
-                        break;
+                if (auxiliar.element.equals(palavra)) aux.PalavrasComMesmaInicial = auxiliar.next;
+                else {
+                    while(auxiliar != null){
+                        if (auxiliar.element.equals(palavra)){
+                            ant.next = auxiliar.next;
+                            break;
+                        }
+                        ant = auxiliar;
+                        auxiliar = auxiliar.next;
                     }
-                    ant = auxiliar;
-                    auxiliar = auxiliar.next;
-                    
-                } 
-                
+                }
             }
-
-            count--;
+            
         }
     }
 
     public void removeNode(Node n){
         Node ant = n.prev;
-        if (n.PalavrasComMesmaInicial != null){
+        Node prox = n.next;
+        NodePalavra head = n.PalavrasComMesmaInicial;
 
-            Node temp = new Node(n.PalavrasComMesmaInicial.element);
-            temp.PalavrasComMesmaInicial = n.PalavrasComMesmaInicial.next;
+        if (head != null){
+            Node temp = new Node(head.element);
+            temp.PalavrasComMesmaInicial = head.next;
 
-            temp.next = n.next;
+            temp.next = prox;
             temp.prev = ant;
             ant.next = temp;
-            n.next.prev = temp;
+            prox.prev = temp;
+            System.out.println("passei o nodo palavra pra frente " + temp.element);
         } else {
-            ant.next = n.next;
-            n.next.prev = ant;
+            ant.next = prox;
+            prox.prev = ant;
+            count--;
         }
-        System.out.println("removi o nodo inteiro");
     }
 
     public Node findNode(String word){
         Node aux = header.next;
         while(aux != null){
-            if (word.charAt(0) == aux.element.charAt(0)) return aux;
+            if (isInitialEqual(word, aux.element)) return aux;
             aux = aux.next;
         }
         return null;
-        
+    }
+
+    boolean isInitialEqual(String a, String b){
+        if ((a == null) || b == null) return false;
+
+        return a.charAt(0) == b.charAt(0);
+    }
+
+    boolean isSmaller(String a, String b){
+        if ((a == null) || b == null) return false;
+
+        return a.compareTo(b) < 0;
     }
     
     // NÃO ALTERAR A PARTIR DAQUI
@@ -244,16 +246,13 @@ public class DoubleLinkedListOfHeaders {
         Imprime("HASH: " + geraHash()+ "\n");
     }
 
-    // NÃO ALTERAR
-    /*
-     * *********************************************
-     * Deste ponto em diante, o código serve para gerar codigo DOT
-     * NAO ALTERE
-     * Gera uma saida no formato DOT
-     * Esta saida pode ser visualizada no GraphViz
-     * Versoes online do GraphViz pode ser encontradas em
-     * http://www.webgraphviz.com/
-     */
+    // *********************************************
+    // Deste ponto em diante, o código serve para gerar codigo DOT
+    // NAO ALTERE
+    // Gera uma saida no formato DOT
+    // Esta saida pode ser visualizada no GraphViz
+    // Versoes online do GraphViz pode ser encontradas em
+    // http://www.webgraphviz.com/
     public void GeraDOT() 
     {
         Imprime("digraph g { \nnode [shape = record,height=.1];\n" + "\n");
@@ -318,5 +317,4 @@ public class DoubleLinkedListOfHeaders {
             aux = aux.next;
         }
     }
-
 }

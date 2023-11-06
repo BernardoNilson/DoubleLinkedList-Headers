@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,23 +12,25 @@ import java.nio.file.Paths;
  * Orientação:
  * @author Prof. Marcio Pinho
  */
-
 public class Main {
 
-    // NÃO ALTERAR
+
     public static void LeArquivo(String nome, DoubleLinkedListOfHeaders L)
     {
+        L.Imprime("Arquivo:" + nome + "*\n");
         Path path1 = Paths.get(nome);
 
-        //try (BufferedReader reader = Files.newBufferedReader(path1, Charset.defaultCharset())) {
-        try (BufferedReader reader = Files.newBufferedReader(path1, StandardCharsets.UTF_8)) {
+        try (BufferedReader reader = Files.newBufferedReader(path1, Charset.defaultCharset())) {
+        //try (BufferedReader reader = Files.newBufferedReader(path1, StandardCharsets.UTF_8)) {
             String line = null;
 
             int cont = 0;
             while ((line = reader.readLine()) != null) {
-                //System.out.println("Linha: "+ line);
-                L.addIncreasingOrder(line);
+                if (line.charAt(0) == '-')
+                    L.Remove(line.substring(1, line.length())); 
+                else L.addIncreasingOrder(line);
                 cont++;
+                L.ImprimeLista();
             }
         } catch (IOException e) {
             System.err.format("Erro na leitura do arquivo: ", e);
@@ -37,26 +40,20 @@ public class Main {
 
         DoubleLinkedListOfHeaders L = new DoubleLinkedListOfHeaders();
 
-        LeArquivo("ListaDePalavrasDEC.txt", L);
+        L.Imprime("\n\n\n\n\n\n\n\n");
 
-        // Ao inves de ler um arquivo, voce pode testar seu métodos 
-        // usando chamadas do método addIncreasingOrder
-        
-        L.addIncreasingOrder("Casa");     
-        L.addIncreasingOrder("Dado");
-        L.addIncreasingOrder("Abacate");
-        
-        L.addIncreasingOrder("Bolacha");
-        L.addIncreasingOrder("Casado");
+        if (args.length == 1)
+        {
+            LeArquivo(args[0], L);
+        }
+        else {
+            L.Imprime("Linha de Comando Invalida."+args.length+"\n");
+            L.Imprime("Digite java Main NomeArquivo.txt\n");
+            return;
+        }
 
-        L.Remove("Simples");
-        L.Remove("Querido");
-        L.Remove("Papel");
+       L.ImprimeLista();
 
-        L.ImprimeLista();
-
-        L.GeraDOT();
-
-        
+       L.GeraDOT();
     }
 }
